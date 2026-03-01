@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix 8/3 - Gửi người con gái anh yêu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background-color: black;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Canvas cho hiệu ứng Matrix */
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Nội dung chính - KHÔNG CÓ KHUNG, chỉ chữ nổi */
+        .content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 900px;
+            width: 90%;
+            padding: 20px;
+            /* Không có background, không có border, không có box-shadow */
+        }
+
+        /* Chữ nổi thay đổi - MÀU ĐỎ */
+        .changing-text {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #ff0000; /* Màu đỏ */
+            text-shadow: 0 0 20px #ff0000,
+                        0 0 40px #ff3333,
+                        0 0 60px #ff0000;
+            margin-bottom: 30px;
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            animation: textPulse 2s infinite;
+            line-height: 1.3;
+        }
+
+        @keyframes textPulse {
+            0% { text-shadow: 0 0 20px #ff0000, 0 0 40px #ff3333; }
+            50% { text-shadow: 0 0 30px #ff3333, 0 0 60px #ff0000, 0 0 80px #ff6666; }
+            100% { text-shadow: 0 0 20px #ff0000, 0 0 40px #ff3333; }
+        }
+
+        /* Dòng kẻ đỏ */
+        .red-line {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff0000, #ff6666, #ff0000, transparent);
+            margin: 30px 0;
+            box-shadow: 0 0 20px #ff0000;
+        }
+
+        /* Thông tin phụ - MÀU ĐỎ */
+        .sub-info {
+            color: #ff3333;
+            font-size: 1.8rem;
+            opacity: 0.9;
+            margin: 25px 0;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            text-shadow: 0 0 15px #ff0000;
+            font-weight: bold;
+        }
+
+        /* Trái tim đỏ */
+        .red-heart {
+            font-size: 4rem;
+            color: #ff0000;
+            text-shadow: 0 0 30px #ff0000,
+                        0 0 60px #ff6666;
+            margin: 20px 0;
+            animation: heartBeat 1.5s infinite;
+            filter: drop-shadow(0 0 20px red);
+        }
+
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.3); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.2); }
+            70% { transform: scale(1); }
+        }
+
+        /* Dòng chữ nhấp nháy cuối - MÀU ĐỎ */
+        .blink-text {
+            color: #ff3333;
+            font-size: 1.5rem;
+            opacity: 0.9;
+            animation: blink 1.5s infinite;
+            margin-top: 40px;
+            font-style: italic;
+            text-shadow: 0 0 10px #ff0000;
+            letter-spacing: 2px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.9; text-shadow: 0 0 10px #ff0000; }
+            50% { opacity: 0.4; text-shadow: 0 0 20px #ff6666; }
+        }
+
+        /* Badge góc - MÀU ĐỎ */
+        .matrix-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #ff3333;
+            font-size: 1rem;
+            opacity: 0.6;
+            z-index: 20;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 8px #ff0000;
+        }
+
+        /* Responsive cho mobile */
+        @media (max-width: 768px) {
+            .changing-text {
+                font-size: 3rem;
+                letter-spacing: 4px;
+                min-height: 120px;
+            }
+            
+            .sub-info {
+                font-size: 1.3rem;
+                letter-spacing: 3px;
+            }
+            
+            .blink-text {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .changing-text {
+                font-size: 2.2rem;
+                letter-spacing: 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas cho hiệu ứng Matrix -->
+    <canvas id="matrixCanvas"></canvas>
+    
+    <!-- Badge nhỏ góc trái -->
+    <div class="matrix-badge">SYSTEM://8.3_RED_MATRIX</div>
+
+    <!-- Nội dung chính - KHÔNG KHUNG, chỉ chữ nổi đỏ -->
+    <div class="content">
+        <div class="sub-info">›‹ MẬT MÃ 8/3 ›‹</div>
+        
+        <!-- Dòng chữ thay đổi - MÀU ĐỎ -->
+        <div class="changing-text" id="dynamicText">CHÀO EM</div>
+        
+        <div class="red-line"></div>
+        
+        <!-- Trái tim đỏ -->
+        <div class="red-heart">❤️🔥</div>
+        
+        <div class="sub-info">›‹ DÀNH CHO EM ›‹</div>
+        
+        <!-- Dòng chữ nhấp nháy -->
+        <div class="blink-text">
+            _ NGƯỜI CON GÁI ANH YÊU THƯƠNG _
+        </div>
+    </div>
+
+    <script>
+        // ==================== HIỆU ỨNG MATRIX ====================
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Thiết lập kích thước canvas
+        function setCanvasSize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        setCanvasSize();
+
+        // Các ký tự sử dụng trong hiệu ứng Matrix
+        const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const charArray = chars.split('');
+        
+        // Cấu hình cột
+        const fontSize = 18;
+        let columns = canvas.width / fontSize;
+        let drops = [];
+
+        function initializeDrops() {
+            columns = canvas.width / fontSize;
+            drops = [];
+            for (let i = 0; i < columns; i++) {
+                drops[i] = Math.floor(Math.random() * -canvas.height / fontSize);
+            }
+        }
+        initializeDrops();
+
+        // Vẽ hiệu ứng Matrix - MÀU ĐỎ
+        function drawMatrix() {
+            // Nền đen với độ mờ
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Vẽ từng cột chữ - MÀU ĐỎ
+            for (let i = 0; i < drops.length; i++) {
+                // Chọn ký tự ngẫu nhiên
+                const text = charArray[Math.floor(Math.random() * charArray.length)];
+                
+                // Màu đỏ với độ sáng khác nhau
+                const brightness = Math.random() * 0.7 + 0.3;
+                ctx.fillStyle = `rgba(255, 0, 0, ${brightness})`;
+                
+                // Font chữ
+                ctx.font = fontSize + 'px monospace';
+                
+                // Vẽ ký tự
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                // Reset khi chạm đáy
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        // Chạy animation
+        setInterval(drawMatrix, 40);
+
+        // ==================== HIỆU ỨNG CHỮ THAY ĐỔI ====================
+        const textElement = document.getElementById('dynamicText');
+        const messages = [
+            'CHÀO EM',
+            'HÔM NAY 8/3',
+            'CHÚC EM VUI VẺ',
+            'MÃI YÊU EM',
+            'EM CỦA ANH'
+        ];
+        
+        let currentIndex = 0;
+        
+        // Hàm cập nhật chữ với hiệu ứng
+        function updateText() {
+            // Hiệu ứng nhấp nháy khi đổi chữ
+            textElement.style.opacity = '0.3';
+            textElement.style.transform = 'scale(1.1)';
+            
+            setTimeout(() => {
+                textElement.innerText = messages[currentIndex];
+                textElement.style.opacity = '1';
+                textElement.style.transform = 'scale(1)';
+                
+                // Chuyển sang tin nhắn tiếp theo
+                currentIndex = (currentIndex + 1) % messages.length;
+            }, 150);
+        }
+
+        // Đặt timer cho chữ thay đổi (2 giây)
+        setInterval(updateText, 2000);
+        
+        // Khởi tạo lần đầu sau 1 giây
+        setTimeout(() => {
+            updateText();
+        }, 1000);
+
+        // ==================== XỬ LÝ RESIZE ====================
+        window.addEventListener('resize', () => {
+            setCanvasSize();
+            initializeDrops();
+        });
+
+        // Hiệu ứng click đặc biệt
+        canvas.addEventListener('click', () => {
+            // Tạo hiệu ứng nhấp nháy đỏ
+            document.body.style.backgroundColor = '#330000';
+            setTimeout(() => {
+                document.body.style.backgroundColor = 'black';
+            }, 200);
+        });
+
+        console.log('❤️ Chúc mừng 8/3 - Dành cho người con gái đặc biệt! ❤️');
+    </script>
+</body>
+</html>
